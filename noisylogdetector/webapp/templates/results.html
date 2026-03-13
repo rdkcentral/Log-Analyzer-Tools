@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block title %}Analysis Results - Log Quality Analyzer{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-chart-bar me-2"></i>Analysis Results</h1>
+    <div>
+        <a href="{{ url_for('index') }}" class="btn btn-secondary me-2">
+            <i class="fas fa-upload me-1"></i>Analyze Another File
+        </a>
+        {% if results.get('id') %}
+        <a href="{{ url_for('download_report', analysis_id=results.id) }}" class="btn btn-success">
+            <i class="fas fa-download me-1"></i>Download Report
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- File Info -->
+<div class="alert alert-primary">
+    <h5><i class="fas fa-file-alt me-2"></i>File: {{ results.filename }}</h5>
+</div>
+
+<!-- Summary Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <h2 class="display-4">{{ results.summary.total_issues }}</h2>
+                <p class="card-text">Total Issues</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body text-center">
+                <h2 class="display-4">{{ results.summary.noisy_count }}</h2>
+                <p class="card-text">Noisy Logs</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-danger text-white">
+            <div class="card-body text-center">
+                <h2 class="display-4">{{ results.summary.sensitive_count }}</h2>
+                <p class="card-text">Sensitive Data</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                <h2 class="display-4">{{ results.summary.severity_count }}</h2>
+                <p class="card-text">Severity Issues</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Results -->
+{% if results.summary.total_issues == 0 %}
+<div class="alert alert-success text-center">
+    <h4><i class="fas fa-check-circle me-2"></i>Great Job!</h4>
+    <p class="mb-0">No issues found in your log file. Your logging practices look good!</p>
+</div>
+{% else %}
+
+<!-- Noisy Logs Section -->
+<div class="card mb-4">
+    <div class="card-header bg-warning text-white">
+        <h3 class="card-title mb-0">
+            <i class="fas fa-volume-up me-2"></i>Noisy Logs ({{ results.summary.noisy_count }})
+        </h3>
+    </div>
+    <div class="card-body">
+        {% if results.noisy_logs %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th width="10%">Line #</th>
+                        <th width="20%">Reason</th>
+                        <th width="70%">Log Entry</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in results.noisy_logs %}
+                    <tr>
+                        <td><span class="badge bg-secondary">{{ log.line }}</span></td>
+                        <td>{{ log.reason }}</td>
+                        <td><code class="text-wrap">{{ log.log }}</code></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted mb-0">No noisy logs found.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Sensitive Data Section -->
+<div class="card mb-4">
+    <div class="card-header bg-danger text-white">
+        <h3 class="card-title mb-0">
+            <i class="fas fa-shield-alt me-2"></i>Sensitive / PII Data ({{ results.summary.sensitive_count }})
+        </h3>
+    </div>
+    <div class="card-body">
+        {% if results.sensitive_logs %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th width="10%">Line #</th>
+                        <th width="20%">Reason</th>
+                        <th width="70%">Log Entry</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in results.sensitive_logs %}
+                    <tr>
+                        <td><span class="badge bg-secondary">{{ log.line }}</span></td>
+                        <td>{{ log.reason }}</td>
+                        <td><code class="text-wrap">{{ log.log }}</code></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted mb-0">No sensitive data found.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Severity Violations Section -->
+<div class="card mb-4">
+    <div class="card-header bg-info text-white">
+        <h3 class="card-title mb-0">
+            <i class="fas fa-exclamation-triangle me-2"></i>Severity Violations ({{ results.summary.severity_count }})
+        </h3>
+    </div>
+    <div class="card-body">
+        {% if results.severity_violations %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th width="10%">Line #</th>
+                        <th width="20%">Reason</th>
+                        <th width="70%">Log Entry</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in results.severity_violations %}
+                    <tr>
+                        <td><span class="badge bg-secondary">{{ log.line }}</span></td>
+                        <td>{{ log.reason }}</td>
+                        <td><code class="text-wrap">{{ log.log }}</code></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted mb-0">No severity violations found.</p>
+        {% endif %}
+    </div>
+</div>
+
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Add click-to-copy functionality for log entries
+document.querySelectorAll('code').forEach(function(codeBlock) {
+    codeBlock.style.cursor = 'pointer';
+    codeBlock.title = 'Click to copy';
+    codeBlock.addEventListener('click', function() {
+        navigator.clipboard.writeText(codeBlock.textContent).then(function() {
+            // Show temporary feedback
+            const originalText = codeBlock.textContent;
+            codeBlock.textContent = 'Copied!';
+            setTimeout(function() {
+                codeBlock.textContent = originalText;
+            }, 1000);
+        });
+    });
+});
+</script>
+{% endblock %}
