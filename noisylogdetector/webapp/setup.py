@@ -29,22 +29,16 @@ def install_dependencies():
         print(f"❌ Failed to install dependencies: {e}")
         return False
 
-def copy_rules_file():
-    """Copy rules.yml from parent directory if it doesn't exist"""
-    rules_path = Path('rules.yml')
-    parent_rules_path = Path('../rules.yml')
-    
+def check_rules_file():
+    """Verify rules.yml exists in the repository root"""
+    rules_path = Path(__file__).resolve().parent.parent / 'rules.yml'
+
     if not rules_path.exists():
-        if parent_rules_path.exists():
-            print("\n📄 Copying rules.yml from parent directory...")
-            shutil.copy2(parent_rules_path, rules_path)
-            print("✅ Rules file copied successfully!")
-        else:
-            print("\n⚠️  Warning: rules.yml not found!")
-            print("Please make sure rules.yml exists in the webapp directory")
-            return False
-    else:
-        print("✅ Rules file exists")
+        print("\n⚠️  Warning: rules.yml not found in repository root!")
+        print(f"Expected location: {rules_path}")
+        return False
+
+    print("✅ Rules file found")
     return True
 
 def create_directories():
@@ -107,7 +101,7 @@ def main():
         print("\n❌ Setup failed: Missing required files")
         sys.exit(1)
     
-    if not copy_rules_file():
+    if not check_rules_file():
         print("\n⚠️  Warning: Rules file issue detected")
     
     if not install_dependencies():

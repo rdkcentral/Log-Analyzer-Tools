@@ -3,6 +3,7 @@
 Flask Web Application for Log Quality Analyzer
 """
 import os
+import io
 import json
 import sqlite3
 from datetime import datetime
@@ -20,7 +21,7 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
 # Configuration
 UPLOAD_FOLDER = 'uploads'
-RULES_FILE = '../rules.yml'  # Relative to webapp folder
+RULES_FILE = Path(__file__).resolve().parent.parent / 'rules.yml'
 DATABASE = 'analysis_history.db'
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -31,6 +32,25 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 # Allowed file extensions
 ALLOWED_EXTENSIONS = {'txt', 'log'}
 
+
+RULES_REQUIRED_KEYS = [
+    "sensitive_patterns",
+    "failure_keywords",
+    "noisy_log_levels",
+    "required_severity_on_failure",
+]
+
+
+def validate_rules_dict(rules):
+    """Validate a parsed rules dict using the same checks as load_rules().
+
+    Raises ValueError with a descriptive message if validation fails.
+    """
+    if not isinstance(rules, dict):
+        raise ValueError("Rules content is empty or not a valid YAML mapping.")
+    missing = [k for k in RULES_REQUIRED_KEYS if k not in rules or rules[k] is None]
+    if missing:
+        raise ValueError(f"Rules is missing required keys: {', '.join(missing)}")
 
 def init_db():
     """Initialize the database for analysis history"""
@@ -88,13 +108,13 @@ def upload_file():
     """Handle file upload and analysis"""
     if 'file' not in request.files:
         flash('No file selected')
-        return redirect(request.url)
+        return redirect(url_for('index'))
     
     file = request.files['file']
     
     if file.filename == '':
         flash('No file selected')
-        return redirect(request.url)
+        return redirect(url_for('index'))
     
     if file and allowed_file(file.filename):
         try:
@@ -153,24 +173,29 @@ def update_rules():
     """Update rules configuration"""
     try:
         rules_content = request.form['rules_content']
-        
-        # Validate YAML
-        yaml.safe_load(rules_content)
-        
+
+        # Validate YAML syntax
+        parsed = yaml.safe_load(rules_content)
+
+        # Validate required keys/types (same logic as load_rules())
+        validate_rules_dict(parsed)
+
         # Save to file
         with open(RULES_FILE, 'w') as f:
             f.write(rules_content)
-        
+
         flash('Rules updated successfully!')
         return redirect(url_for('view_rules'))
-        
+
     except yaml.YAMLError as e:
         flash(f'Invalid YAML format: {str(e)}')
+        return render_template('rules.html', rules_content=request.form['rules_content'])
+    except ValueError as e:
+        flash(f'Invalid rules configuration: {str(e)}')
         return render_template('rules.html', rules_content=request.form['rules_content'])
     except Exception as e:
         flash(f'Error updating rules: {str(e)}')
         return render_template('rules.html', rules_content=request.form['rules_content'])
-
 
 @app.route('/history')
 def analysis_history():
@@ -227,29 +252,30 @@ def download_report(analysis_id):
         if result:
             results = json.loads(result[0])
             filename = result[1]
-            
-            # Generate HTML report
+
+            # Generate HTML report in memory — no temp file needed
             html_content = generate_html_report(
                 results['noisy_logs'],
-                results['sensitive_logs'], 
+                results['sensitive_logs'],
                 results['severity_violations']
             )
-            
-            # Save to temporary file
+
             report_filename = f"log_analysis_report_{analysis_id}.html"
-            temp_path = os.path.join(UPLOAD_FOLDER, report_filename)
-            
-            with open(temp_path, 'w', encoding='utf-8') as f:
-                f.write(html_content)
-            
-            return send_file(temp_path, as_attachment=True, download_name=report_filename)
+            buffer = io.BytesIO(html_content.encode('utf-8'))
+            buffer.seek(0)
+
+            return send_file(
+                buffer,
+                as_attachment=True,
+                download_name=report_filename,
+                mimetype='text/html'
+            )
         else:
             flash('Analysis not found')
             return redirect(url_for('analysis_history'))
     except Exception as e:
         flash(f'Error generating report: {str(e)}')
         return redirect(url_for('analysis_history'))
-
 
 # API Endpoints
 @app.route('/api/analyze', methods=['POST'])
@@ -296,7 +322,7 @@ def api_analyze():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-
+    
 @app.route('/api/rules', methods=['GET'])
 def api_get_rules():
     """API endpoint to get current rules"""
@@ -311,23 +337,24 @@ def api_get_rules():
 def api_update_rules():
     """API endpoint to update rules"""
     try:
-        data = request.get_json()
-        
-        # Validate rules format
-        required_keys = ["sensitive_patterns", "failure_keywords", "noisy_log_levels", "required_severity_on_failure"]
-        for key in required_keys:
-            if key not in data:
-                return jsonify({'error': f'Missing required key: {key}'}), 400
-        
+        data = request.get_json(silent=True)
+
+        if not isinstance(data, dict):
+            return jsonify({'error': 'Request body must be a JSON object'}), 400
+
+        # Validate required keys/types (same logic as load_rules())
+        validate_rules_dict(data)
+
         # Save rules
         with open(RULES_FILE, 'w') as f:
             yaml.dump(data, f, default_flow_style=False)
-        
+
         return jsonify({'message': 'Rules updated successfully'})
-        
+
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
 
 @app.route('/api/history')
 def api_get_history():
