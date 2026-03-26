@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeFileUpload();
     initializeTooltips();
     initializeCopyFeatures();
-    initializeDragAndDrop();
 });
 
 // Initialize file upload functionality
@@ -182,62 +181,6 @@ function showCopyFeedback(element) {
         element.style.backgroundColor = '';
         element.style.color = '';
     }, 1500);
-}
-
-// Initialize drag and drop functionality
-function initializeDragAndDrop() {
-    const uploadZone = document.querySelector('.upload-zone, .card-body');
-    const fileInput = document.getElementById('file');
-    
-    if (uploadZone && fileInput) {
-        // Prevent default drag behaviors
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            uploadZone.addEventListener(eventName, preventDefaults, false);
-            document.body.addEventListener(eventName, preventDefaults, false);
-        });
-        
-        // Highlight drop zone when item is dragged over it
-        ['dragenter', 'dragover'].forEach(eventName => {
-            uploadZone.addEventListener(eventName, highlight, false);
-        });
-        
-        ['dragleave', 'drop'].forEach(eventName => {
-            uploadZone.addEventListener(eventName, unhighlight, false);
-        });
-        
-        // Handle dropped files
-        uploadZone.addEventListener('drop', handleDrop, false);
-    }
-}
-
-// Prevent default drag behaviors
-function preventDefaults(e) {
-    e.preventDefault();
-    e.stopPropagation();
-}
-
-// Highlight upload zone
-function highlight(e) {
-    e.currentTarget.classList.add('dragover');
-}
-
-// Remove highlight from upload zone
-function unhighlight(e) {
-    e.currentTarget.classList.remove('dragover');
-}
-
-// Handle dropped files
-function handleDrop(e) {
-    const dt = e.dataTransfer;
-    const files = dt.files;
-    
-    if (files.length > 0) {
-        const fileInput = document.getElementById('file');
-        if (fileInput) {
-            fileInput.files = files;
-            handleFileSelection({ target: fileInput });
-        }
-    }
 }
 
 // Show alert messages

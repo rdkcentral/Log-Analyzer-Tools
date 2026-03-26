@@ -57,7 +57,7 @@ A Flask-based web application for analyzing log files to detect noisy logging, s
 ## í³‹ Features
 
 ### Web Interface
-- **File Upload**: Drag-and-drop or browse to upload log files
+- **File Upload**: browse to upload log files
 - **Real-time Analysis**: Instant results displayed in the browser
 - **Interactive Results**: Click-to-copy log entries, visual highlighting
 - **Downloadable Reports**: Generate and download HTML reports

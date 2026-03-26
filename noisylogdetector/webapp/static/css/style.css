@@ -26,26 +26,6 @@ body {
     border-bottom: none;
 }
 
-/* Upload Zone Styling */
-.upload-zone {
-    border: 2px dashed #dee2e6;
-    border-radius: 10px;
-    padding: 40px;
-    text-align: center;
-    transition: all 0.3s ease;
-    background-color: #fff;
-}
-
-.upload-zone:hover {
-    border-color: #007bff;
-    background-color: #f8f9ff;
-}
-
-.upload-zone.dragover {
-    border-color: #28a745;
-    background-color: #f0fff4;
-}
-
 /* File Input Custom Styling */
 .form-control:focus {
     border-color: #007bff;

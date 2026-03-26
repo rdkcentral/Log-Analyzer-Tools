@@ -1,0 +1,28 @@
+# Runtime-generated SQLite database (analysis history)
+analysis_history.db
+
+# Uploaded log files (temporary, processed and deleted at runtime)
+webapp/uploads/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+Thumbs.db
+.DS_Store
