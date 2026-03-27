@@ -41,7 +41,6 @@ A Flask-based web application for analyzing log files to detect noisy logging, s
    - Verify Python 3.6+ is installed
    - Install required dependencies from `requirements.txt`
    - Create necessary directories (`uploads/`, `static/`, `templates/`)
-   - Copy `rules.yml` from the parent directory if not present
    - Validate all required files are in place
 
 3. **Once setup completes successfully, start the web application:**

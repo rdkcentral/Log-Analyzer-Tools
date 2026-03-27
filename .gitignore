@@ -1,9 +1,3 @@
-# Runtime-generated SQLite database (analysis history)
-analysis_history.db
-
-# Uploaded log files (temporary, processed and deleted at runtime)
-webapp/uploads/
-
 # Python
 __pycache__/
 *.py[cod]
