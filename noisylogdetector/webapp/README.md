@@ -18,7 +18,7 @@ A Flask-based web application for analyzing log files to detect noisy logging, s
 
 ---
 
-## ÔøΩÌ∫Ä Quick Start
+## ÔøΩÔøΩÔøΩÔøΩ Quick Start
 
 ### Prerequisites
 - Python 3.6 or higher
@@ -30,7 +30,7 @@ A Flask-based web application for analyzing log files to detect noisy logging, s
 
 1. **Navigate to the webapp directory:**
    ```bash
-   cd webapp
+   cd noisylogdetector/webapp
    ```
 
 2. **Run the setup script (required ‚Äî first time only):**
@@ -53,7 +53,7 @@ A Flask-based web application for analyzing log files to detect noisy logging, s
    http://localhost:5000
    ```
 
-## Ì≥ã Features
+## ÔøΩÔøΩÔøΩ Features
 
 ### Web Interface
 - **File Upload**: browse to upload log files
@@ -69,7 +69,7 @@ A Flask-based web application for analyzing log files to detect noisy logging, s
 - `PUT /api/rules` - Update rules configuration
 - `GET /api/history` - Get analysis history
 
-## Ì≥Ç Project Structure
+## ÔøΩÔøΩÔøΩ Project Structure
 
 ```
 webapp/
@@ -157,7 +157,7 @@ python3 setup.py
 
 ---
 
-## ÔøΩÌ¥ß Configuration
+## ÔøΩÔøΩÔøΩÔøΩ Configuration
 
 ### Rules Configuration (rules.yml)
 
@@ -203,7 +203,7 @@ ALLOWED_EXTENSIONS = {'txt', 'log'}
 DATABASE = 'analysis_history.db'
 ```
 
-## Ì≥ä Analysis Categories
+## ÔøΩÔøΩÔøΩ Analysis Categories
 
 ### 1. Noisy Logs
 Detects excessive logging at verbose levels:
@@ -224,7 +224,7 @@ Finds failure conditions logged at incorrect levels:
 - Failure keywords at non-ERROR levels
 - Missing required severity for critical events
 
-## Ì¥ó API Usage
+## ÔøΩÔøΩÔøΩ API Usage
 
 ### Analyze Log File
 ```bash
@@ -247,7 +247,7 @@ curl -X PUT -H "Content-Type: application/json" \
 curl http://localhost:5000/api/history
 ```
 
-## Ìª†Ô∏è Development
+## ÔøΩÔøΩÔøΩÔ∏è Development
 
 ### Running in Development Mode
 ```bash
@@ -264,7 +264,7 @@ Use the included test scripts or tools like Postman to test API endpoints.
 - **Functionality**: Extend JavaScript in `static/js/app.js`
 - **Analysis Logic**: Modify `log_analyzer.py` for custom analysis rules
 
-## Ì¥í Security Considerations
+## ÔøΩÔøΩÔøΩ Security Considerations
 
 - **File Upload Limits**: Set appropriate file size limits
 - **Input Validation**: Validate all user inputs
@@ -272,14 +272,14 @@ Use the included test scripts or tools like Postman to test API endpoints.
 - **HTTPS**: Use HTTPS in production environments
 - **Authentication**: Consider adding user authentication for production use
 
-## Ì≥à Performance Tips
+## ÔøΩÔøΩÔøΩ Performance Tips
 
 - **File Size**: Keep uploaded files under 16MB for optimal performance
 - **Database**: Regular cleanup of old analysis history
 - **Memory**: Monitor memory usage for large log files
 - **Concurrent Users**: Consider using a production WSGI server like Gunicorn
 
-## Ì∞õ Troubleshooting
+## ÔøΩÔøΩÔøΩ Troubleshooting
 
 ### Common Issues
 
@@ -306,11 +306,11 @@ export FLASK_DEBUG=1
 python3 app.py
 ```
 
-## Ì≥ù License
+## ÔøΩÔøΩÔøΩ License
 
 This project is licensed under the same terms as the original Log Quality Analyzer.
 
-## Ì¥ù Contributing
+## ÔøΩÔøΩÔøΩ Contributing
 
 1. Fork the repository
 2. Create a feature branch
@@ -318,7 +318,7 @@ This project is licensed under the same terms as the original Log Quality Analyz
 4. Test thoroughly
 5. Submit a pull request
 
-## Ì≥û Support
+## ÔøΩÔøΩÔøΩ Support
 
 For issues and questions:
 - Check the troubleshooting section above

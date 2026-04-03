@@ -25,7 +25,7 @@
 # The script reads configuration from rules.yml and generates an HTML report
 # showing all detected issues with line numbers and redacted sensitive content.
 #
-# Usage: python3 noisyLogDetector.py <log_file> <output.html>
+# Usage: python3 noisylogdetector.py <log_file> <output.html>
 # Requirements: rules.yml configuration file and Python 3 with PyYAML library
 
 import re

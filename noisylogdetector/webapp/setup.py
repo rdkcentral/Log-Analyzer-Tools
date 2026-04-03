@@ -21,7 +21,6 @@ Setup script for Log Quality Analyzer Web Application
 import os
 import sys
 import subprocess
-import shutil
 from pathlib import Path
 
 def check_python_version():
