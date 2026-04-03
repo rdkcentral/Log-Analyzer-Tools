@@ -72,25 +72,26 @@ A Flask-based web application for analyzing log files to detect noisy logging, s
 ## Project Structure
 
 ```
-webapp/
-├── app.py                 # Main Flask application
-├── log_analyzer.py        # Core analysis logic
-├── setup.py              # Setup and installation script
-├── requirements.txt       # Python dependencies
-├── rules.yml             # Analysis rules configuration
-├── analysis_history.db   # SQLite database for history
-├── uploads/              # Temporary file uploads
-├── templates/            # HTML templates
-│   ├── base.html
-│   ├── index.html        # Main upload page
-│   ├── results.html      # Analysis results
-│   ├── rules.html        # Rules configuration
-│   └── history.html      # Analysis history
-└── static/               # CSS, JavaScript, and assets
-    ├── css/
-    │   └── style.css
-    └── js/
-        └── app.js
+noisylogdetector/
+├── rules.yml             # Analysis rules configuration shared with webapp
+└── webapp/
+    ├── app.py                 # Main Flask application
+    ├── log_analyzer.py        # Core analysis logic
+    ├── setup.py               # Setup and installation script
+    ├── requirements.txt       # Python dependencies
+    ├── analysis_history.db    # SQLite database for history
+    ├── uploads/               # Temporary file uploads
+    ├── templates/             # HTML templates
+    │   ├── base.html
+    │   ├── index.html         # Main upload page
+    │   ├── results.html       # Analysis results
+    │   ├── rules.html         # Rules configuration
+    │   └── history.html       # Analysis history
+    └── static/                # CSS, JavaScript, and assets
+        ├── css/
+        │   └── style.css
+        └── js/
+            └── app.js
 ```
 
 ## Python Scripts
