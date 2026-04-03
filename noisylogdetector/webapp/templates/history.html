@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block title %}Analysis History - Log Quality Analyzer{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-history me-2"></i>Analysis History</h1>
+    <a href="{{ url_for('index') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-1"></i>Back to Home
+    </a>
+</div>
+
+{% if history %}
+<div class="card">
+    <div class="card-header bg-primary text-white">
+        <h3 class="card-title mb-0">
+            <i class="fas fa-table me-2"></i>Previous Analyses ({{ history|length }})
+        </h3>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Date/Time</th>
+                        <th>Filename</th>
+                        <th class="text-center">
+                            <i class="fas fa-volume-up text-warning" title="Noisy Logs"></i>
+                        </th>
+                        <th class="text-center">
+                            <i class="fas fa-shield-alt text-danger" title="Sensitive Data"></i>
+                        </th>
+                        <th class="text-center">
+                            <i class="fas fa-exclamation-triangle text-info" title="Severity Issues"></i>
+                        </th>
+                        <th class="text-center">Total</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in history %}
+                    <tr>
+                        <td>
+                            <small>{{ record[1][:19].replace('T', ' ') }}</small>
+                        </td>
+                        <td>
+                            <strong>{{ record[2] }}</strong>
+                        </td>
+                        <td class="text-center">
+                            {% if record[3] > 0 %}
+                                <span class="badge bg-warning">{{ record[3] }}</span>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            {% if record[4] > 0 %}
+                                <span class="badge bg-danger">{{ record[4] }}</span>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            {% if record[5] > 0 %}
+                                <span class="badge bg-info">{{ record[5] }}</span>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            {% if record[6] > 0 %}
+                                <span class="badge bg-primary">{{ record[6] }}</span>
+                            {% else %}
+                                <span class="badge bg-success">0</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('view_analysis', analysis_id=record[0]) }}" 
+                                   class="btn btn-outline-primary btn-sm" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{{ url_for('download_report', analysis_id=record[0]) }}" 
+                                   class="btn btn-outline-success btn-sm" title="Download Report">
+                                    <i class="fas fa-download"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card bg-light">
+            <div class="card-body text-center">
+                <h4 class="text-primary">{{ history|length }}</h4>
+                <p class="card-text">Total Analyses</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-light">
+            <div class="card-body text-center">
+                <h4 class="text-warning">{{ history|sum(attribute=3) }}</h4>
+                <p class="card-text">Total Noisy Logs</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-light">
+            <div class="card-body text-center">
+                <h4 class="text-danger">{{ history|sum(attribute=4) }}</h4>
+                <p class="card-text">Sensitive Data Found</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-light">
+            <div class="card-body text-center">
+                <h4 class="text-info">{{ history|sum(attribute=5) }}</h4>
+                <p class="card-text">Severity Violations</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% else %}
+<!-- No History Found -->
+<div class="text-center">
+    <div class="card bg-light">
+        <div class="card-body py-5">
+            <i class="fas fa-history fa-3x text-muted mb-3"></i>
+            <h3 class="text-muted">No Analysis History</h3>
+            <p class="text-muted">You haven't analyzed any log files yet.</p>
+            <a href="{{ url_for('index') }}" class="btn btn-primary">
+                <i class="fas fa-upload me-2"></i>Analyze Your First Log
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Help Section -->
+<div class="alert alert-info mt-4">
+    <h5><i class="fas fa-question-circle me-2"></i>About History</h5>
+    <ul class="mb-0">
+        <li><strong>View Details:</strong> Click the eye icon to see full analysis results</li>
+        <li><strong>Download Report:</strong> Click the download icon to get an HTML report</li>
+        <li><strong>Data Retention:</strong> History is stored locally and shows the last 50 analyses</li>
+        <li><strong>Privacy:</strong> Sensitive data in logs is automatically redacted in the stored results</li>
+    </ul>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Add tooltips to badges
+document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(element) {
+    new bootstrap.Tooltip(element);
+});
+
+// Add row click functionality to view analysis
+document.querySelectorAll('tbody tr').forEach(function(row) {
+    row.style.cursor = 'pointer';
+    row.addEventListener('click', function(e) {
+        // Don't trigger on button clicks
+        if (e.target.tagName !== 'A' && e.target.tagName !== 'I') {
+            const viewBtn = row.querySelector('a[href*="view_analysis"]');
+            if (viewBtn) {
+                window.location.href = viewBtn.href;
+            }
+        }
+    });
+});
+
+// Highlight rows on hover
+document.querySelectorAll('tbody tr').forEach(function(row) {
+    row.addEventListener('mouseenter', function() {
+        this.style.backgroundColor = '#f8f9fa';
+    });
+    row.addEventListener('mouseleave', function() {
+        this.style.backgroundColor = '';
+    });
+});
+</script>
+{% endblock %}

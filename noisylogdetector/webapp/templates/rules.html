@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block title %}Rules Configuration - Log Quality Analyzer{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-cog me-2"></i>Rules Configuration</h1>
+    <a href="{{ url_for('index') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-1"></i>Back to Home
+    </a>
+</div>
+
+<div class="alert alert-info">
+    <h5><i class="fas fa-info-circle me-2"></i>About Rules</h5>
+    <p class="mb-1">The rules configuration defines what patterns and conditions the analyzer looks for:</p>
+    <ul class="mb-0">
+        <li><strong>sensitive_patterns:</strong> Regex patterns to detect sensitive data (PII, tokens, passwords)</li>
+        <li><strong>noisy_log_levels:</strong> Log levels considered as noisy logging</li>
+        <li><strong>failure_keywords:</strong> Keywords that indicate failure conditions</li>
+        <li><strong>required_severity_on_failure:</strong> Required log levels when failure keywords are detected</li>
+    </ul>
+</div>
+
+<div class="card">
+    <div class="card-header bg-primary text-white">
+        <h3 class="card-title mb-0">
+            <i class="fas fa-edit me-2"></i>Edit Rules (YAML Format)
+        </h3>
+    </div>
+    <div class="card-body">
+        <form method="POST">
+            <div class="mb-3">
+                <textarea class="form-control" id="rules_content" name="rules_content" rows="20" style="font-family: 'Courier New', monospace;">{{ rules_content }}</textarea>
+            </div>
+            
+            <div class="d-flex justify-content-between">
+                <div>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save me-2"></i>Save Rules
+                    </button>
+                    <button type="button" class="btn btn-secondary ms-2" onclick="resetRules()">
+                        <i class="fas fa-undo me-2"></i>Reset
+                    </button>
+                </div>
+                <button type="button" class="btn btn-info" onclick="validateYAML()">
+                    <i class="fas fa-check me-2"></i>Validate YAML
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Rules Documentation -->
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-book me-2"></i>Sensitive Patterns Examples
+                </h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <strong>JWT Tokens:</strong><br>
+                        <code>(?i)\btoken\s*[:=]\s*[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{20,}</code>
+                    </li>
+                    <li class="list-group-item">
+                        <strong>API Keys:</strong><br>
+                        <code>(?i)\b(api[_-]?key|apikey)\s*[:=]\s*[A-Za-z0-9]{20,}</code>
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Passwords:</strong><br>
+                        <code>(?i)\b(password|passwd|pwd)\s*[:=]\s*\S{6,}</code>
+                    </li>
+                    <li class="list-group-item">
+                        <strong>IP Addresses:</strong><br>
+                        <code>\b(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)\b</code>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-lightbulb me-2"></i>Configuration Tips
+                </h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <strong>Regex Flags:</strong> Use (?i) for case-insensitive matching
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Word Boundaries:</strong> Use \b to match whole words only
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Testing:</strong> Test patterns with sample log entries first
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Performance:</strong> Avoid overly complex regex patterns
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Escaping:</strong> Escape special YAML characters with quotes
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const originalContent = document.getElementById('rules_content').value;
+
+function resetRules() {
+    if (confirm('Reset to original content? Any unsaved changes will be lost.')) {
+        document.getElementById('rules_content').value = originalContent;
+    }
+}
+
+function validateYAML() {
+    const content = document.getElementById('rules_content').value;
+    try {
+        // Basic YAML validation - just check for obvious syntax errors
+        const lines = content.split('\n');
+        let indentStack = [];
+        let lineNum = 0;
+        
+        for (let line of lines) {
+            lineNum++;
+            if (line.trim() === '' || line.trim().startsWith('#')) continue;
+            
+            // Check for basic YAML syntax
+            if (line.includes('\t')) {
+                throw new Error(`Line ${lineNum}: Tabs are not allowed in YAML, use spaces`);
+            }
+            
+            // Check for proper list syntax
+            if (line.trim().startsWith('- ') && line.includes(':')) {
+                // List item with key-value
+                continue;
+            }
+            
+            if (line.includes(':') && !line.trim().startsWith('-')) {
+                const beforeColon = line.split(':')[0];
+                if (beforeColon.includes(' ') && !beforeColon.includes('"') && !beforeColon.includes("'")) {
+                    throw new Error(`Line ${lineNum}: Key contains spaces but is not quoted`);
+                }
+            }
+        }
+        
+        alert('✓ YAML syntax appears valid!');
+    } catch (error) {
+        alert('✗ YAML validation error: ' + error.message);
+    }
+}
+
+// Add syntax highlighting (basic)
+document.getElementById('rules_content').addEventListener('input', function() {
+    // You could add more sophisticated syntax highlighting here
+});
+
+// Warn about unsaved changes
+let contentChanged = false;
+document.getElementById('rules_content').addEventListener('input', function() {
+    contentChanged = this.value !== originalContent;
+});
+
+window.addEventListener('beforeunload', function(e) {
+    if (contentChanged) {
+        e.preventDefault();
+        e.returnValue = '';
+        return 'You have unsaved changes. Are you sure you want to leave?';
+    }
+});
+
+// Reset contentChanged when form is submitted
+document.querySelector('form').addEventListener('submit', function() {
+    contentChanged = false;
+});
+</script>
+{% endblock %}

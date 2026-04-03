@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Log File - Log Quality Analyzer{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <!-- Header -->
+        <div class="text-center mb-5">
+            <h1 class="display-4 text-primary">
+                <i class="fas fa-file-alt me-3"></i>Log Quality Analyzer
+            </h1>
+            <p class="lead text-muted">
+                Upload your log file to analyze for noisy logging, sensitive data exposure, and severity violations.
+            </p>
+        </div>
+
+        <!-- Upload Form -->
+        <div class="card shadow-lg">
+            <div class="card-header bg-primary text-white">
+                <h3 class="card-title mb-0">
+                    <i class="fas fa-upload me-2"></i>Upload Log File
+                </h3>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('upload_file') }}" enctype="multipart/form-data" id="uploadForm">
+                    <div class="mb-4">
+                        <label for="file" class="form-label">Select Log File</label>
+                        <input type="file" class="form-control" id="file" name="file" accept=".txt,.log" required>
+                        <div class="form-text">
+                            Supported formats: .txt, .log (Max size: 16MB)
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                            <i class="fas fa-chart-line me-2"></i>Analyze Log File
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Features Overview -->
+        <div class="row mt-5">
+            <div class="col-md-4 mb-3">
+                <div class="card h-100 border-warning">
+                    <div class="card-body text-center">
+                        <i class="fas fa-volume-up fa-2x text-warning mb-3"></i>
+                        <h5 class="card-title">Noisy Logs</h5>
+                        <p class="card-text">Detects excessive logging at verbose levels (DEBUG, TRACE, INFO)</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card h-100 border-danger">
+                    <div class="card-body text-center">
+                        <i class="fas fa-shield-alt fa-2x text-danger mb-3"></i>
+                        <h5 class="card-title">Sensitive Data</h5>
+                        <p class="card-text">Identifies PII, passwords, tokens, and other sensitive information</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card h-100 border-info">
+                    <div class="card-body text-center">
+                        <i class="fas fa-exclamation-triangle fa-2x text-info mb-3"></i>
+                        <h5 class="card-title">Severity Issues</h5>
+                        <p class="card-text">Finds failure conditions logged at incorrect severity levels</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- API Information -->
+        <div class="alert alert-info mt-4">
+            <h5><i class="fas fa-code me-2"></i>API Available</h5>
+            <p class="mb-1">You can also use the REST API endpoints:</p>
+            <ul class="mb-0">
+                <li><code>POST /api/analyze</code> - Analyze log file</li>
+                <li><code>GET /api/rules</code> - Get current rules</li>
+                <li><code>PUT /api/rules</code> - Update rules</li>
+                <li><code>GET /api/history</code> - Get analysis history</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('uploadForm').addEventListener('submit', function() {
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Analyzing...';
+    submitBtn.disabled = true;
+});
+
+// File validation
+document.getElementById('file').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    const maxSize = 16 * 1024 * 1024; // 16MB
+
+    if (file && file.size > maxSize) {
+        alert('File size exceeds 16MB limit. Please select a smaller file.');
+        e.target.value = '';
+    }
+});
+</script>
+{% endblock %}
